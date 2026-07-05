@@ -1,0 +1,201 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+  <title>Quiz Master Pro - Enterprise Edition</title>
+  
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght=300;400;600;700&family=Roboto&family=Noto+Sans&family=Courier+New&display=swap" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet">
+  
+  <link rel="stylesheet" href="style.css" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/lz-string/1.4.4/lz-string.min.js"></script>
+  <!-- Standard SheetJS for Excel parsing -->
+  <script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/localforage/1.10.0/localforage.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
+</head>
+<body>
+
+  <div id="toastContainer" class="toast-container"></div>
+
+  <!-- YOUTUBE SIDEBAR -->
+  <aside id="youtubeSidebar" class="sidebar collapsed">
+    <button id="toggleSidebarBtn" class="sidebar-toggle"><i class="ri-youtube-line"></i></button>
+    <div class="sidebar-content">
+        <h3>Featured Channel</h3>
+        <iframe width="100%" height="200" src="https://www.youtube.com/embed/videoseries?list=YOUR_PLAYLIST_ID" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
+    </div>
+  </aside>
+
+  <header class="app-header">
+    <div class="header-content">
+      <div class="logo-area">
+        <div class="logo-icon">📘</div>
+        <div>
+            <h1>Quiz Master (v24 - Cloud) <br> <a href="https://www.youtube.com/@KALVIKADAL" target="_blank"> KALVI KADAL</a></h1>
+            <span class="subtitle">Created By K. SAKTHI VELAVAN</span>
+        </div>
+      </div>
+      <div class="header-actions">
+        <button id="dashboardToggleBtn" class="btn-icon hidden" title="My Dashboard"><i class="ri-dashboard-line"></i></button>
+        <button id="toggleCreatorBtn" class="btn-icon" title="Toggle Creator Mode"><i class="ri-edit-box-line"></i></button>
+        <button id="themeToggleBtn" class="btn-icon" title="Toggle Theme"><i class="ri-moon-line"></i></button>
+      </div>
+    </div>
+  </header>
+
+  <main class="container" id="appContainer">
+    
+    <div id="studentInfoDisplay" class="student-badge hidden">
+        <div class="badge-icon">🎓</div>
+        <div class="badge-text">
+            <span id="dispName" class="name">Student</span>
+            <span id="dispPlace" class="place">Unknown</span>
+        </div>
+    </div>
+
+    <!-- GLOBAL LIBRARY SECTION -->
+    <section id="librarySection" class="panel">
+      <div class="section-header">
+        <h3><i class="ri-cloud-line"></i> Global Cloud Library</h3>
+        <span class="badge-count" id="libCount">Loading...</span>
+      </div>
+
+      <div class="library-controls">
+          <input type="text" id="libSearch" class="search-input" placeholder="🔍 Search quizzes..." />
+          <select id="filterSubject" class="filter-select"><option value="all">All Subjects</option></select>
+          <select id="filterClass" class="filter-select"><option value="all">All Classes</option></select>
+      </div>
+      
+      <div id="libraryGrid" class="library-grid"></div>
+    </section>
+
+    <!-- CREATOR STUDIO PANEL -->
+    <div id="creatorPanel" class="creator-panel">
+        <div class="panel-header">
+            <h3>🛠️ Creator Studio</h3>
+            <button id="closeCreatorBtn" class="btn-text">Close</button>
+        </div>
+        <div class="config-card">
+            <h4><i class="ri-settings-3-line"></i> Rules & Settings</h4>
+            <div class="input-grid three-col">
+                <div class="input-group">
+                    <label>Registration Requirement</label>
+                    <select id="regRequirement">
+                        <option value="yes">Yes</option>
+                        <option value="no">No</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+        <div class="action-bar" style="display: flex; gap: 8px; flex-wrap: wrap; margin-top: 15px;">
+            <input id="csvFileInput" type="file" accept=".csv, .xlsx, .xls, .ods" hidden />
+            <button id="loadCSVBtn" class="btn-secondary" onclick="document.getElementById('csvFileInput').click();"><i class="ri-file-upload-line"></i> Upload Spreadsheet</button>
+            <button id="createManualBtn" class="btn-secondary"><i class="ri-keyboard-line"></i> Manual Workspace</button>
+            <button id="saveToLibraryBtn" class="btn-primary"><i class="ri-cloud-upload-line"></i> Publish to Cloud</button>
+        </div>
+    </div>
+
+    <!-- UNIFIED REGISTRATION / LOGIN MODAL -->
+    <div id="studentLoginModal" class="modal-overlay hidden">
+        <div class="modal-card bounce-in">
+            <div class="modal-icon">🎓</div>
+            <h3 id="authModalTitle">Welcome</h3>
+            <div class="auth-tabs">
+                <button id="tabLogin" class="active">Login</button>
+                <button id="tabRegister">Register</button>
+            </div>
+            
+            <div id="loginForm" class="input-grid" style="display: grid; gap: 15px; grid-template-columns: 1fr;">
+                <input type="text" id="loginIdentifier" placeholder="Phone Number or User ID" required class="q-input" />
+                <button id="loginBtn" class="btn-primary btn-large">Login</button>
+            </div>
+
+            <div id="registerForm" class="input-grid hidden" style="display: grid; gap: 15px; grid-template-columns: 1fr;">
+                <input type="text" id="regName" placeholder="Full Name (Required)" required class="q-input" />
+                <input type="tel" id="regPhone" placeholder="Phone Number (Required)" required class="q-input" />
+                <input type="email" id="regEmail" placeholder="Email Address" class="q-input" />
+                <input type="text" id="regSchool" placeholder="School / Institution" class="q-input" />
+                <input type="text" id="regCity" placeholder="City / District" class="q-input" />
+                <select id="regRole" class="q-input">
+                    <option value="student">Student</option>
+                    <option value="teacher">Teacher</option>
+                </select>
+                <button id="registerBtn" class="btn-primary btn-large">Register & Start</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- USER DASHBOARD MODAL -->
+    <div id="userDashboardModal" class="modal-overlay hidden">
+        <div class="modal-content" style="background: var(--surface); padding: 30px; border-radius: var(--radius); width: 95%; max-width: 900px; max-height: 90vh; overflow-y: auto;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                <h2>My Dashboard</h2>
+                <button id="closeDashboardBtn" class="btn-danger">Close</button>
+            </div>
+            <div class="dashboard-grid">
+                <div class="dash-card"><h3>Exams Completed</h3><p id="dashCompleted">0</p></div>
+                <div class="dash-card"><h3>Certificates</h3><p id="dashCertificates">0</p></div>
+                <div class="dash-card"><h3>Bookmarks</h3><p id="dashBookmarks">0</p></div>
+            </div>
+            <div id="dashHistoryContainer" class="table-wrapper"></div>
+        </div>
+    </div>
+
+    <!-- QUIZ RENDERING CONTAINER ENGINE -->
+    <section id="quizSection" class="quiz-interface hidden">
+        <div class="quiz-top-bar">
+            <!-- Persistent Topic Header -->
+            <div id="persistentTopicHeader" class="topic-header" style="font-weight: bold; color: var(--primary); width: 100%; text-align: center; margin-bottom: 10px; font-size: 1.1rem;">
+                <span id="activeSubject"></span> | <span id="activeTopic"></span> | <span id="activeSource"></span>
+            </div>
+            <div class="timer-badge">
+                <i class="ri-timer-flash-line"></i> <span id="mainTimerLabel">00:00</span>
+            </div>
+            <div class="progress-track">
+                <div class="progress-info">
+                    <span id="questionProgressLabel">Q 1/10</span>
+                </div>
+                <div class="progress-bar"><div id="progressBarFill"></div></div>
+            </div>
+        </div>
+
+        <div class="question-card">
+            <div class="q-header" style="display:flex; justify-content:space-between;">
+                <span id="timerPerQ" class="per-q-timer hidden">--</span>
+            </div>
+            <div id="questionBox" class="q-text"></div>
+        </div>
+
+        <div id="optionsBox" class="options-grid"></div>
+
+        <div class="quiz-nav-bar">
+            <button id="prevBtn" class="nav-btn"><i class="ri-arrow-left-line"></i></button>
+            <button id="bookmarkBtn" class="nav-btn" style="color:var(--accent);"><i class="ri-bookmark-line"></i></button>
+            <button id="nextBtn" class="nav-btn"><i class="ri-arrow-right-line"></i></button>
+            <button id="finishBtn" class="finish-btn">Submit Quiz</button>
+        </div>
+    </section>
+
+    <!-- LIVE COMPREHENSIVE PERFORMANCE REVIEW -->
+    <section id="reviewSection" class="panel hidden">
+      <div class="result-header" style="text-align:center;">
+          <h3>🎉 Quiz Completed</h3>
+          <div class="score-circle">
+              <span id="finalScoreDisplay">0</span>
+          </div>
+      </div>
+      <div class="share-actions">
+          <button id="printPdfBtn" class="btn-accent" style="width:100%; margin-bottom:10px;"><i class="ri-printer-line"></i> Download Answer Key PDF</button>
+      </div>
+      <div id="reviewTableContainer" class="table-wrapper"></div>
+      <button id="homeBtn_review" class="btn-secondary btn-full">Back to Home</button>
+    </section>
+
+  </main>
+  
+  <script type="module" src="script.js"></script>
+</body>
+</html>

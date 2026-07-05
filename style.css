@@ -1,0 +1,69 @@
+:root {
+  --primary: #0d9488;       
+  --primary-dark: #0f766e;  
+  --secondary: #f3f4f6;
+  --text-main: #1f2937;
+  --text-light: #6b7280;
+  --bg-body: #f0fdfa;       
+  --surface: #ffffff;
+  --accent: #f97316;        
+  --success: #10b981;
+  --danger: #ef4444;
+  --border: #e5e7eb;
+  --radius: 12px;
+  --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+}
+
+body.dark-mode {
+  --primary: #14b8a6;       
+  --bg-body: #111827;
+  --surface: #1f2937;
+  --text-main: #f3f4f6;
+  --text-light: #9ca3af;
+  --border: #374151;
+  --secondary: #374151;
+}
+
+* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+body { margin: 0; font-family: 'Inter', sans-serif; background: var(--bg-body); color: var(--text-main); line-height: 1.5; }
+
+/* YouTube Sidebar */
+.sidebar {
+    position: fixed; left: 0; top: 0; height: 100vh; width: 300px;
+    background: var(--surface); box-shadow: var(--shadow);
+    transition: transform 0.3s ease; z-index: 1000;
+}
+.sidebar.collapsed { transform: translateX(-300px); }
+.sidebar-toggle {
+    position: absolute; right: -40px; top: 80px; width: 40px; height: 40px;
+    background: var(--primary); color: white; border: none;
+    border-radius: 0 8px 8px 0; cursor: pointer; font-size: 1.5rem;
+}
+.sidebar-content { padding: 20px; }
+
+/* Dashboard Grid */
+.dashboard-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin-bottom: 20px; }
+.dash-card { background: var(--secondary); padding: 20px; border-radius: var(--radius); text-align: center; }
+.dash-card h3 { color: var(--text-light); margin-bottom: 10px; font-size: 0.9rem; }
+.dash-card p { color: var(--primary); font-size: 2rem; font-weight: bold; margin: 0; }
+
+/* Auth Tabs */
+.auth-tabs { display: flex; margin-bottom: 15px; border-bottom: 2px solid var(--border); }
+.auth-tabs button { flex: 1; padding: 10px; background: transparent; border: none; font-weight: bold; color: var(--text-light); border-bottom: 2px solid transparent; margin-bottom: -2px; }
+.auth-tabs button.active { color: var(--primary); border-bottom-color: var(--primary); }
+
+.app-header { background: var(--surface); position: sticky; top: 0; z-index: 100; box-shadow: var(--shadow); padding: 12px 0; }
+.container { max-width: 800px; margin: 20px auto; padding: 0 15px; padding-bottom: 80px; }
+.hidden { display: none !important; }
+
+/* Print Styles for High-Quality Answer Key and Question PDF */
+@media print {
+    body { background: white; padding: 0; }
+    .app-header, .sidebar, .sidebar-toggle, .share-actions, .quiz-nav-bar { display: none !important; }
+    #reviewTableContainer, .document-header-frame { width: 100%; margin: 0; }
+    .review-card { page-break-inside: avoid; border: 1px solid #ccc; padding: 15px; margin-bottom: 15px; }
+    .ans-box { border: 1px solid #ddd !important; }
+    h1, h2, h3, h4 { color: #000 !important; }
+    * { color: #000 !important; background: transparent !important; box-shadow: none !important; }
+}
